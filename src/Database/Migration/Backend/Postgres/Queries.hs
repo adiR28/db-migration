@@ -6,18 +6,13 @@ import qualified Database.Beam.Postgres as BP
 import qualified Database.PostgreSQL.Simple as Pg
 
 import Control.Monad (void)
-import Data.Maybe (fromMaybe)
-import qualified Data.Vector as V
-import Database.Migration.Utils.Common
-import qualified Database.Migration.Utils.Beam as UB
 import qualified Database.Beam.Postgres.Migrate as BPM
 
 getSequencesFromPg ::
      BP.Connection
   -> T.Text
   -> IO [(String, String, String, String, String, String, String, String)]
-getSequencesFromPg conn mSchema = do
-  eitherResp <- 
+getSequencesFromPg conn mSchema =
     BPM.executePgQueryAndWrap conn
       (fromString
         $ unlines
@@ -27,24 +22,17 @@ getSequencesFromPg conn mSchema = do
             , "where sequence_schema = '" ++ T.unpack mSchema ++ "';"
             ])
       BPM.mkToRowInstanceMaybe
-  case eitherResp of
-    Left err -> error $ T.unpack err
-    Right res -> return res
 
 getSchemasFromPg :: BP.Connection -> IO [T.Text]
-getSchemasFromPg conn = do
-  eitherResp <- BPM.executePgQueryAndWrap conn 
+getSchemasFromPg conn =
+  map Pg.fromOnly <$> BPM.executePgQueryAndWrap conn 
     (fromString
         "select schema_name from information_schema.schemata where catalog_name = current_database();")
     BPM.mkToRowInstanceMaybe
-  case eitherResp of
-    Left err -> error $ T.unpack err
-    Right resp -> return $ Pg.fromOnly <$> resp
 
 getColumnDefaultsFromPg ::
      BP.Connection -> T.Text -> IO [(T.Text, T.Text, T.Text, T.Text)]
-getColumnDefaultsFromPg conn mSchema = do
-  eitherResp <- 
+getColumnDefaultsFromPg conn mSchema =
     BPM.executePgQueryAndWrap 
       conn
       (fromString
@@ -55,16 +43,9 @@ getColumnDefaultsFromPg conn mSchema = do
               , "table_schema = '" ++ T.unpack mSchema ++ "';"
               ])
       BPM.mkToRowInstanceMaybe
-  case eitherResp of
-    Left err -> error $ T.unpack err
-    Right resp -> return resp
 
 getSearchPath :: BP.Connection -> IO [T.Text]
-getSearchPath conn = do
-  eitherResp <- BPM.executePgQueryAndWrap conn (fromString "select current_schemas(false)") BPM.mkToRowInstanceMaybe
-  case eitherResp of
-    Left err -> error $ T.unpack err
-    Right res -> return $ (Pg.fromOnly <$> res)
+getSearchPath conn = map Pg.fromOnly <$> BPM.executePgQueryAndWrap conn (fromString "select current_schemas(false)") BPM.mkToRowInstanceMaybe
 -- fromMaybe [] . headMaybe . fmap (V.toList . Pg.fromOnly) 
 -- understand this
 

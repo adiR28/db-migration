@@ -6,7 +6,7 @@ packages:
 
 extra-deps:
   - github: adiR28/beam
-    commit: e1e9ad6e5ea7bc3a402f1b8f2853c7c739b6996c
+    commit: af7f1f3ee0b12f32e2c538aeb299d324b06adc6c
     subdirs:
       - beam-core
       - beam-migrate
