@@ -4,9 +4,11 @@ import Data.String (fromString)
 import qualified Data.Text as T
 import qualified Database.Beam.Postgres as BP
 import qualified Database.PostgreSQL.Simple as Pg
-
+import Data.Maybe(fromMaybe)
+import qualified Data.Vector as V
 import Control.Monad (void)
 import qualified Database.Beam.Postgres.Migrate as BPM
+import Database.Migration.Utils.Common(headMaybe)
 
 getSequencesFromPg ::
      BP.Connection
@@ -45,9 +47,9 @@ getColumnDefaultsFromPg conn mSchema =
       BPM.mkToRowInstanceMaybe
 
 getSearchPath :: BP.Connection -> IO [T.Text]
-getSearchPath conn = map Pg.fromOnly <$> BPM.executePgQueryAndWrap conn (fromString "select current_schemas(false)") BPM.mkToRowInstanceMaybe
--- fromMaybe [] . headMaybe . fmap (V.toList . Pg.fromOnly) 
--- understand this
+getSearchPath conn = 
+  fromMaybe [] . headMaybe . fmap (V.toList . Pg.fromOnly)
+    <$> BPM.executePgQueryAndWrap conn (fromString "select current_schemas(false)") BPM.mkToRowInstanceMaybe
 
 setSearchPath :: BP.Connection -> [T.Text] -> IO ()
 setSearchPath conn schemas =
