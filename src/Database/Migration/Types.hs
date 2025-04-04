@@ -28,9 +28,22 @@ class RenderPredicate be p where
 
 type ColumnTypeCheck = T.Text -> T.Text -> ColumnType -> ColumnType -> Bool
 
+data LoopbackLimitValue = NoLimit | Limit Int
+
+data LoopbackLimit = LoopbackLimit
+  {   defaultLimit :: LoopbackLimitValue
+    , partitionedTableMapLimit :: !(HM.HashMap T.Text LoopbackLimitValue)
+    , logPreloopbackPartionedErr :: Bool
+  }
+
+data PartitonFormat = YYYYMM | MMYYYY -- TODO add support weekly paritions or Daily Partitons
+
 data PartitionOption = PartitionOption
   { includeParentTable :: !Bool
   , partitionMap :: !(HM.HashMap T.Text [T.Text])
+  , loopBackLimit :: LoopbackLimit
+  , partitionDelimiter :: T.Text -- TODO make this Table Specific HashMap
+  , partitionFormat :: PartitonFormat
   }
 
 data Options = Options
@@ -42,8 +55,11 @@ data Options = Options
   , listDifference :: !Bool 
   }
 
+defaultLoopbackLimit :: LoopbackLimit
+defaultLoopbackLimit = LoopbackLimit NoLimit HM.empty False
+
 defaultPartitionOption :: PartitionOption
-defaultPartitionOption = PartitionOption True HM.empty
+defaultPartitionOption = PartitionOption True HM.empty defaultLoopbackLimit "_M_" YYYYMM
 
 defaultOptions :: Options
 defaultOptions = Options [] Nothing defaultPartitionOption False False True

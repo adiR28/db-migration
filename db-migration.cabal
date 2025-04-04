@@ -70,6 +70,7 @@ library
     , postgresql-simple
     , scientific
     , text
+    , time
     , unliftio
     , unordered-containers
     , vector

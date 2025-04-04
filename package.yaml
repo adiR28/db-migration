@@ -53,6 +53,7 @@ library:
     - free
     - extra
     - unliftio
+    - time
 
 executables:
   generate-dll:

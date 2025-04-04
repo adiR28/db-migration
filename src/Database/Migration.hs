@@ -56,7 +56,7 @@ schemaDiffIteration conn options actualPredicates haskellConstraints = do
         DF.foldl'
           (\preds dP ->
              maybe preds (snoc preds)
-               $ lenientPredicateCheck options dP groupedDBChecks)
+               $ lenientlyCheckPredicate options dP groupedDBChecks)
           []
           dbPredicates
   if null lenientPredicates
